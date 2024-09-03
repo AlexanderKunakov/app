@@ -1,6 +1,54 @@
 import React, {useState} from 'react';
-import axios from 'axios';
 import './MitsizateText.css';
+
+// Функции для мицелизации текста
+const Vowel = "аоуыэяёюие";
+const Consonant = "лмнрбвгджзпфктшсхцчщ";
+
+function mitsWord(str2) {
+    if (str2.length < 6) return str2;
+    str2 = str2.toLowerCase();
+    const c0 = str2[0];
+    const c1 = str2[1];
+    const c2 = str2[2];
+
+    if (Consonant.includes(c0) && Consonant.includes(c2) && Vowel.includes(c1)) {
+        if (c0 === 'м' || c2 === 'ц') {
+            return "Миц" + str2.slice(3);
+        }
+        if (str2.slice(2, 4) === "тс") {
+            return "Миц" + str2.slice(4);
+        }
+    }
+    return str2;
+}
+
+function mitsGeneration(str) {
+    if (str.length < 6) return str;
+    str = str + " ";
+    let finalResult = "";
+    for (let i = 0; i < str.length; i++) {
+        let currentWord = "";
+        let k = 0;
+        const a = str[i];
+        if (/[а-яА-ЯёЁ]/.test(a)) {
+            for (let j = i; j < str.length; j++) {
+                const b = str[j];
+                if (/[а-яА-ЯёЁ]/.test(b)) {
+                    currentWord += b;
+                    k++;
+                } else {
+                    i = i + k - 1;
+                    break;
+                }
+            }
+            finalResult += mitsWord(currentWord);
+        } else {
+            finalResult += a;
+        }
+    }
+    return finalResult.trim();
+}
 
 const MitsizateText = () => {
     const [inputText, setInputText] = useState('');
@@ -11,22 +59,18 @@ const MitsizateText = () => {
         setInputText(e.target.value);
     };
 
-    const handleMitsizateClick = async () => {
-        try {
-            const response = await axios.post('/mitsizate', {value: inputText});
-            setMitseziedText(response.data.mitseziedValue);
-            setCopySuccess('');
-        } catch (error) {
-            console.error('Пока занят', error);
-        }
+    const handleMitsizateClick = () => {
+        const result = mitsGeneration(inputText);
+        setMitseziedText(result);
+        setCopySuccess(''); // Очистить статус после нового запроса
     };
 
     const handleCopyClick = () => {
         navigator.clipboard.writeText(mitseziedText).then(() => {
-            setCopySuccess('Сделано');
-            setTimeout(() => setCopySuccess(''), 2000);
+            setCopySuccess('Скопировано!');
+            setTimeout(() => setCopySuccess(''), 2000); // Убираем статус через 2 секунды
         }, () => {
-            setCopySuccess('Пока занят');
+            setCopySuccess('Не удалось скопировать');
         });
     };
 
@@ -44,11 +88,11 @@ const MitsizateText = () => {
             </label>
 
             <button className="mitsizate-button" onClick={handleMitsizateClick}>
-                Сделаешь?
+                Мицелизировать
             </button>
 
             <label className="mitsizate-label">
-                Сделано:
+                Мицелизированный текст:
                 <textarea
                     className="mitsizate-output"
                     value={mitseziedText}
