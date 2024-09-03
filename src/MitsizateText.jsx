@@ -14,8 +14,7 @@ const MitsizateText = () => {
     const handleMitsizateClick = async () => {
         try {
             const response = await axios.post('/mitsizate', {value: inputText});
-            // setMitseziedText(response.data.mitseziedValue);
-            setMitseziedText('В работе');
+            setMitseziedText(response.data.mitseziedValue);
             setCopySuccess('');
         } catch (error) {
             console.error('Пока занят', error);
@@ -25,7 +24,7 @@ const MitsizateText = () => {
     const handleCopyClick = () => {
         navigator.clipboard.writeText(mitseziedText).then(() => {
             setCopySuccess('Сделано');
-            setTimeout(() => setCopySuccess(''), 2000); // Убираем статус через 2 секунды
+            setTimeout(() => setCopySuccess(''), 2000);
         }, () => {
             setCopySuccess('Пока занят');
         });
